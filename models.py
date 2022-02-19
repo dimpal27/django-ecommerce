@@ -1,74 +1,63 @@
 from django.db import models
-from django.urls import reverse
-from multiselectfield import MultiSelectField
+from django.forms import ModelForm
+from django_countries.fields import CountryField
+
+from Admin.models import Product, User
 
 
-class User(models.Model):
-    firstname = models.CharField(max_length=100)
-    lastname = models.CharField(max_length=100)
-    email = models.EmailField()
-    password = models.CharField(max_length=10)
-    is_admin= models.IntegerField()
-    confirm_password = models.CharField(max_length=10)
-    contact = models.CharField(max_length=12)
+class CartItem(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    ordered = models.BooleanField(default=False)
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
 
-    class Meta:
-        db_table = 'User'
+    def __str__(self):
+        return f"{self.quantity} of {self.product_id.pro_name}"
 
-
-class Category(models.Model):
-    image = models.FileField()
-    item = models.CharField(max_length=50)
-
-    class Meta:
-        db_table = 'Category'
+    def get_total_item_price(self):
+        return self.quantity * self.product_id.price
 
 
-class Sub_Category(models.Model):
-    sub_id = models.AutoField(primary_key=True)
-    image = models.FileField()
-    name = models.CharField(max_length=100)
-    Category_id = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
+class Order(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    item = models.ManyToManyField(CartItem)
+    total_price = models.FloatField()
+    start_date = models.DateTimeField(auto_now_add=True)
+    ordered_date = models.DateTimeField()
+    ordered = models.BooleanField(default=False)
+    billing_Address = models.ForeignKey('BillingAdress', on_delete=models.CASCADE, null=True)
 
-    class Meta:
-        db_table = 'Sub_Category'
+    def __str__(self):
+        return self.user_id.firstname
 
-
-class Product(models.Model):
-    COLOR_CHOICES = (
-        ('1', 'Black'),
-        ('2', 'Blue'),
-        ('3', 'Red'),
-        ('4', 'White'),
-        ('5', 'Yellow'),
-        ('6', 'Green'),
-        ('7', 'Gray'),
-    )
-    SIZE_CHOICES =(
-        ('1', 'S'),
-        ('2', 'M'),
-        ('3', 'L'),
-        ('4', 'XL'),
-        ('5', 'XXL'),
-        ('6', 'XXXL'),
-    )
-    pro_name = models.CharField(max_length=30)
-    file = models.FileField()
-    description = models.TextField()
-    price = models.IntegerField()
-    discount = models.IntegerField()
-    size = MultiSelectField(max_length=200, choices=SIZE_CHOICES, max_choices=5)
-    colors = MultiSelectField(max_length=200, choices=COLOR_CHOICES, max_choices=6)
-    sub_cat_id = models.ForeignKey(Sub_Category, on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'Product'
+    def total(self):
+        return sum(item.get_total_item_price() for item in self.item.all())
 
 
+class ShippingAddress(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    Street_Address = models.CharField(max_length=100, null=True, blank=True)
+    Apartment_Address = models.CharField(max_length=100, null=True, blank=True)
+    Countries = CountryField(multiple=False, null=True, blank=True)
+    Zip = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    phone = models.CharField(max_length=20, null=True, blank=True)
+    E_mail = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return self.user_id.firstname
 
 
-class gallery(models.Model):
-    gal_id = models.AutoField(primary_key=True)
-    gal_image = models.FileField()
-    pro_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+class BillingAdress(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    Street_Address = models.CharField(max_length=100)
+    Apartment_Address = models.CharField(max_length=100, null=True, blank=True)
+    Countries = models.CharField(max_length=50)
+    Zip = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    phone = models.CharField(max_length=10)
+    E_mail = models.EmailField()
 
+
+    def __str__(self):
+        return self.user_id.firstname

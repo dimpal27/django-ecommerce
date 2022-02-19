@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import multiselectfield.db.fields
+import django_countries.fields
 
 
 class Migration(migrations.Migration):
@@ -10,71 +10,59 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('Admin', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Category',
+            name='BillingAdress',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.FileField(upload_to='')),
-                ('item', models.CharField(max_length=50)),
+                ('Street_Address', models.CharField(max_length=100)),
+                ('Apartment_Address', models.CharField(blank=True, max_length=100, null=True)),
+                ('Countries', models.CharField(max_length=50)),
+                ('Zip', models.CharField(max_length=100)),
+                ('city', models.CharField(blank=True, max_length=100, null=True)),
+                ('phone', models.CharField(max_length=10)),
+                ('E_mail', models.EmailField(max_length=254)),
+                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Admin.user')),
             ],
-            options={
-                'db_table': 'Category',
-            },
         ),
         migrations.CreateModel(
-            name='User',
+            name='CartItem',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('firstname', models.CharField(max_length=100)),
-                ('lastname', models.CharField(max_length=100)),
-                ('email', models.EmailField(max_length=254)),
-                ('password', models.CharField(max_length=10)),
-                ('is_admin', models.IntegerField()),
-                ('confirm_password', models.CharField(max_length=10)),
-                ('contact', models.CharField(max_length=12)),
+                ('ordered', models.BooleanField(default=False)),
+                ('quantity', models.IntegerField(default=1)),
+                ('product_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Admin.product')),
+                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Admin.user')),
             ],
-            options={
-                'db_table': 'User',
-            },
         ),
         migrations.CreateModel(
-            name='Sub_Category',
-            fields=[
-                ('sub_id', models.AutoField(primary_key=True, serialize=False)),
-                ('image', models.FileField(upload_to='')),
-                ('name', models.CharField(max_length=100)),
-                ('Category_id', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='Admin.category')),
-            ],
-            options={
-                'db_table': 'Sub_Category',
-            },
-        ),
-        migrations.CreateModel(
-            name='Product',
+            name='ShippingAddress',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('pro_name', models.CharField(max_length=30)),
-                ('file', models.FileField(upload_to='')),
-                ('description', models.TextField()),
-                ('price', models.IntegerField()),
-                ('discount', models.IntegerField()),
-                ('size', multiselectfield.db.fields.MultiSelectField(choices=[('1', 'S'), ('2', 'M'), ('3', 'L'), ('4', 'XL'), ('5', 'XXL'), ('6', 'XXXL')], max_length=200)),
-                ('colors', multiselectfield.db.fields.MultiSelectField(choices=[('1', 'Black'), ('2', 'Blue'), ('3', 'Red'), ('4', 'White'), ('5', 'Yellow'), ('6', 'Green'), ('7', 'Gray')], max_length=200)),
-                ('sub_cat_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Admin.sub_category')),
+                ('Street_Address', models.CharField(blank=True, max_length=100, null=True)),
+                ('Apartment_Address', models.CharField(blank=True, max_length=100, null=True)),
+                ('Countries', django_countries.fields.CountryField(blank=True, max_length=2, null=True)),
+                ('Zip', models.CharField(blank=True, max_length=100, null=True)),
+                ('city', models.CharField(blank=True, max_length=100, null=True)),
+                ('phone', models.CharField(blank=True, max_length=20, null=True)),
+                ('E_mail', models.EmailField(blank=True, max_length=254, null=True)),
+                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Admin.user')),
             ],
-            options={
-                'db_table': 'Product',
-            },
         ),
         migrations.CreateModel(
-            name='gallery',
+            name='Order',
             fields=[
-                ('gal_id', models.AutoField(primary_key=True, serialize=False)),
-                ('gal_image', models.FileField(upload_to='')),
-                ('pro_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Admin.product')),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('total_price', models.FloatField()),
+                ('start_date', models.DateTimeField(auto_now_add=True)),
+                ('ordered_date', models.DateTimeField()),
+                ('ordered', models.BooleanField(default=False)),
+                ('billing_Address', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='client.billingadress')),
+                ('item', models.ManyToManyField(to='client.CartItem')),
+                ('user_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Admin.user')),
             ],
         ),
     ]

@@ -1,32 +1,23 @@
 from django.urls import path
-from . import views
+from . import client_views
 
 urlpatterns = [
-    path('show/', views.show),
-    path('create_user/', views.create_user),
-    path('user_list/', views.user_list),
-    path('login/', views.login),
-    path('Category/', views.CategoryInsert),
-    path('cat_edit/<int:id>', views.cat_edit),
-    path('cat_update/<int:id>', views.cat_update),
-    path('cat_delete/<int:id>', views.cat_delete),
-    path('product_list/', views.product_list),
-    path('pro_details/<int:id>/', views.pro_details),
-    path('sub_category/', views.sub_category),
-    path('sub_edit/<int:id>', views.sub_edit),
-    path('sub_update/<int:id>', views.sub_update),
-    path('sub_delete/<int:id>', views.sub_delete),
-    path('add_pro/', views.add_pro),
-    path('pro_edit/<int:id>', views.pro_edit),
-    path('pro_update/<int:id>', views.pro_update),
-    path('pro_delete/<int:id>', views.pro_delete),
-    path('gallery_add/', views.gallery_add),
-    path('gal_edit/<int:id>/', views.gal_edit),
-    path('gal_update/<int:id>/', views.gal_update),
-    path('gal_delete/<int:id>', views.gal_delete),
-    path('order_show/', views.order_Show),
-
-
+    path('client_index/', client_views.client_index),
+    path('client_login/', client_views.client_login),
+    path('logout/', client_views.logout),
+    path('client_register/', client_views.client_register),
+    path('header/', client_views.header),
+    path('client_sub_cat/<int:id>/', client_views.client_sub_cat),
+    path('client_product/<int:id>/', client_views.client_product),
+    path('client_product_details/<int:id>/', client_views.client_product_details),
+    path('add_to_cart/', client_views.add_to_cart),
+    path('show_cart/', client_views.show_cart),
+    path('adjust_cart/<int:id>/', client_views.adjust_cart),
+    path('checkout/', client_views.checkout),
+    path('order_summery/', client_views.order_summery),
+    path('payment_done/', client_views.payment_done),
+    path('order_success/', client_views.order_success),
+    path('client_pro_view/', client_views.client_pro_view)
 
 
 ]
